@@ -165,7 +165,7 @@
 		background-blend-mode: normal;
 	}
 
-	:where(.sidebar-pane a) {
+	:where(.sidebar-content a) {
 		display: block;
 		border: 1px solid transparent;
 		border-radius: 0.34rem;
@@ -176,13 +176,13 @@
 		transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
 	}
 
-	:where(.sidebar-pane a:hover) {
+	:where(.sidebar-content a:hover) {
 		color: var(--gb-link-strong);
 		background-color: var(--gb-surface-hover);
 		border-color: var(--sl-color-border);
 	}
 
-	:where(.sidebar-pane a:focus-visible) {
+	:where(.sidebar-content a:focus-visible) {
 		outline: 2px solid var(--sl-color-focus);
 		outline-offset: 1px;
 		background-color: var(--gb-surface-soft);
@@ -190,7 +190,7 @@
 		color: var(--gb-link-strong);
 	}
 
-	:where(.sidebar-pane a[aria-current='page']) {
+	:where(.sidebar-content a[aria-current='page']) {
 		color: var(--gb-sidebar-active);
 		background-color: var(--gb-surface-active);
 		border-color: var(--gb-sidebar-active);
@@ -228,11 +228,11 @@
 		color: var(--gb-selection-emphasis-fg);
 	}
 
-	:where(.sl-badge, .badge, kbd, th, td > code, .sidebar-pane a[aria-current='page']) {
+	:where(.sl-badge, .badge, kbd, th, td > code, .sidebar-content a[aria-current='page']) {
 		font-family: var(--gb-font-mono);
 	}
 
-	:where(.sidebar-pane, .home-projects .card-grid > *) {
+	:where(.sidebar-pane) {
 		background-image: var(--gb-terminal-texture);
 	}
 
@@ -247,9 +247,10 @@
 
 	.home-projects .card-grid > :nth-child(1) {
 		border-color: var(--gb-green);
-		background:
+		background-color: var(--sl-color-bg-nav);
+		background-image:
 			radial-gradient(circle at top right, rgba(184, 187, 38, 0.14), transparent 55%),
-			var(--sl-color-bg-nav);
+			var(--gb-terminal-texture);
 	}
 
 	.home-projects .card-grid > :nth-child(1) .body {
@@ -265,9 +266,10 @@
 	.home-projects .card-grid > :nth-child(2),
 	.home-projects .card-grid > :nth-child(3) {
 		border-color: var(--sl-color-border);
-		background:
+		background-color: var(--sl-color-bg-nav);
+		background-image:
 			linear-gradient(180deg, rgba(131, 165, 152, 0.08), transparent 38%),
-			var(--sl-color-bg-nav);
+			var(--gb-terminal-texture);
 	}
 
 	/* Task 2 component-state checklist (rerun):
