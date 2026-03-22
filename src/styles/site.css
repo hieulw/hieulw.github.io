@@ -1,0 +1,32 @@
+@layer starlight.overrides {
+	:root {
+		--forge-accent: #f97316;
+		--forge-accent-soft: rgba(249, 115, 22, 0.15);
+	}
+
+	.home-projects .card-grid {
+		margin-top: 1.25rem;
+	}
+
+	.home-projects .card-grid > :nth-child(1) {
+		border-color: var(--forge-accent);
+		background:
+			radial-gradient(circle at top right, var(--forge-accent-soft), transparent 55%),
+			var(--sl-color-black);
+	}
+
+	.home-projects .card-grid > :nth-child(1) .body {
+		display: grid;
+		gap: 0.9rem;
+	}
+
+	.home-projects .card-grid > :nth-child(1) .sl-link-button {
+		justify-self: start;
+		margin: 0;
+	}
+
+	.home-projects .card-grid > :nth-child(2),
+	.home-projects .card-grid > :nth-child(3) {
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 35%);
+	}
+}
