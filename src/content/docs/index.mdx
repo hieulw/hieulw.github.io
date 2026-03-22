@@ -1,43 +1,40 @@
 ---
-title: Hieu's Knowledge Base
-description: Personal notes on engineering, systems, and growth.
+title: Home
+description: Personal documentation hub for backend and software projects.
 template: splash
 hero:
-  tagline: Code. Systems. Growth.
+  title: Hieu's Knowledge Base
+  tagline: Project-first docs for systems design, backend engineering, and implementation practice.
   actions:
-    - text: Read latest note
-      link: /til/effective-notes/
+    - text: Open Forge
+      link: /forge/
       icon: right-arrow
-    - text: About this site
-      link: /about/
-      icon: external
+    - text: GitHub
+      link: https://github.com/hieulw
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Explore by topic
+## Projects
 
-<CardGrid stagger>
-	<Card title="Programming" icon="pencil">
-		Practical notes on language features, architecture, and code quality.
-	</Card>
-	<Card title="DevOps" icon="setting">
-		Runbooks, deployment tips, CI/CD lessons, and production checklists.
-	</Card>
-	<Card title="Tools" icon="add-document">
-		Cheat sheets and workflows for the tools used every day.
-	</Card>
-	<Card title="TIL" icon="open-book">
-		Short entries for lessons learned and useful ideas worth remembering.
-	</Card>
-	<Card title="Career" icon="star">
-		Communication, planning, and habits that improve long-term growth.
-	</Card>
-</CardGrid>
+<div class="home-projects">
+  <CardGrid stagger>
+    <Card title="Forge" icon="rocket">
+      A Golang microservice framework with architecture notes, patterns, and real implementation logs.
+      [Explore Forge](/forge/)
+    </Card>
+    <Card title="Design Principles" icon="puzzle">
+      Service boundaries, communication choices, reliability patterns, and practical architecture tradeoffs.
+    </Card>
+    <Card title="Roadmap" icon="list-format">
+      More project tracks are coming soon. Forge is the first path in a larger backend engineering library.
+    </Card>
+  </CardGrid>
+</div>
 
-## Latest updates
+## Focus Right Now
 
-- [Effective notes for daily learning](/til/effective-notes/) - 2026-02-28
-- [Git branch naming convention](/tools/git-branch-naming/) - 2026-02-28
-- [Stable Node.js service startup checklist](/devops/node-service-startup-checklist/) - 2026-02-28
+- Learn Go deeply through real service code.
+- Build reusable microservice foundations.
+- Capture architecture decisions and tradeoffs.
