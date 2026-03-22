@@ -143,8 +143,9 @@
 
 	@media print {
 		:root,
-		:root[data-theme='light'] {
-			--gb-inline-code-fg: var(--sl-color-text);
+		:root[data-theme='light'],
+		:root[data-theme='dark'] {
+			--gb-inline-code-fg: #3c3836;
 		}
 	}
 
