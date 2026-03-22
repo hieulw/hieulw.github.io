@@ -141,6 +141,12 @@
 		border-radius: 0.26rem;
 	}
 
+	@media print {
+		:root {
+			--gb-inline-code-fg: var(--sl-color-text);
+		}
+	}
+
 	:where(.pagination-links a) {
 		border: 1px solid transparent;
 		border-radius: 0.4rem;
