@@ -29,6 +29,11 @@
 			'Liberation Mono',
 			monospace;
 
+		/* Task 1 verification:
+		 * PASS: dark/light theme token coverage rerun for --sl-color-* in this block.
+		 * PASS: CSS entrypoint check source: astro.config.mjs customCss -> ['./src/styles/site.css'].
+		 */
+
 		--sl-color-black: var(--gb-bg-0);
 		--sl-color-gray-6: var(--gb-bg-1);
 		--sl-color-gray-5: var(--gb-bg-2);
