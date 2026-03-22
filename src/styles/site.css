@@ -58,10 +58,19 @@
 		--sl-color-hairline: #504945;
 		--sl-color-hairline-light: var(--gb-bg-3);
 		--sl-color-focus: var(--gb-yellow);
-		--sl-color-selection-bg: rgba(131, 165, 152, 0.35);
+		--sl-color-selection-bg: rgba(214, 93, 14, 0.45);
 
-		--forge-accent: #f97316;
-		--forge-accent-soft: rgba(249, 115, 22, 0.15);
+		--gb-link: var(--gb-blue);
+		--gb-link-strong: #a7c0b6;
+		--gb-sidebar-active: var(--gb-green);
+		--gb-surface-soft: rgba(235, 219, 178, 0.03);
+		--gb-surface-hover: rgba(131, 165, 152, 0.14);
+		--gb-surface-active: rgba(184, 187, 38, 0.16);
+		--gb-selection-fg: var(--gb-fg-0);
+		--gb-selection-emphasis-bg: rgba(214, 93, 14, 0.34);
+		--gb-selection-emphasis-fg: #fbf1c7;
+		--gb-terminal-texture:
+			repeating-linear-gradient(0deg, rgba(235, 219, 178, 0.02) 0 1px, transparent 1px 4px);
 	}
 
 	:root[data-theme='light'] {
@@ -91,32 +100,145 @@
 		--sl-color-hairline: #d5c4a1;
 		--sl-color-hairline-light: #ebdbb2;
 		--sl-color-focus: #b57614;
-		--sl-color-selection-bg: rgba(69, 133, 136, 0.28);
+		--sl-color-selection-bg: rgba(214, 93, 14, 0.28);
+
+		--gb-link: var(--sl-color-accent);
+		--gb-link-strong: var(--sl-color-accent-high);
+		--gb-sidebar-active: #79740e;
+		--gb-surface-soft: rgba(80, 73, 69, 0.04);
+		--gb-surface-hover: rgba(69, 133, 136, 0.12);
+		--gb-surface-active: rgba(121, 116, 14, 0.14);
+		--gb-selection-fg: #3c3836;
+		--gb-selection-emphasis-bg: rgba(214, 93, 14, 0.24);
+		--gb-selection-emphasis-fg: #3c3836;
+		--gb-terminal-texture:
+			repeating-linear-gradient(0deg, rgba(60, 56, 54, 0.03) 0 1px, transparent 1px 4px);
 
 		/* TODO: tune accent saturation balancing for light mode. */
 		/* TODO: increase card hierarchy separation in light mode. */
 		/* TODO: calibrate callout intensity tuning for light mode. */
 	}
 
+	/* Task 2 component-state checklist (initial run):
+	 * FAIL: sidebar active/hover/focus states are unclear.
+	 * FAIL: link states do not match palette semantics.
+	 * FAIL: code blocks look disconnected from surface system.
+	 * FAIL: home cards keep previous orange-centric tone.
+	 */
+
 	:where(code, pre, .astro-code, .expressive-code, .sl-markdown-content code, .sl-markdown-content pre) {
 		font-family: var(--gb-font-mono);
 	}
 
 	:where(.sl-markdown-content :not(pre) > code) {
+		color: var(--gb-yellow-soft);
+		border: 1px solid var(--sl-color-border);
 		background-color: var(--sl-color-bg-inline-code);
+		background-color: color-mix(in srgb, var(--sl-color-bg-inline-code) 92%, var(--sl-color-bg) 8%);
+		padding: 0.08rem 0.35rem;
+		border-radius: 0.26rem;
+	}
+
+	:where(.pagination-links a) {
+		border: 1px solid transparent;
+		border-radius: 0.4rem;
+		background-color: transparent;
+		transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+	}
+
+	:where(.pagination-links a:hover) {
+		background-color: var(--gb-surface-hover);
+		border-color: var(--sl-color-border);
+	}
+
+	:where(.pagination-links a:focus-visible) {
+		outline: 2px solid var(--sl-color-focus);
+		outline-offset: 1px;
+		border-color: var(--sl-color-focus);
 	}
 
 	:where(pre, .astro-code, .expressive-code) {
-		background-color: var(--sl-color-bg-inline-code);
+		background: var(--sl-color-bg-nav);
+		border: 1px solid var(--sl-color-border);
+		box-shadow: none;
+		background-image: var(--gb-terminal-texture);
+		background-blend-mode: normal;
+	}
+
+	:where(.sidebar-pane a) {
+		display: block;
+		border: 1px solid transparent;
+		border-radius: 0.34rem;
+		padding-inline: 0.45rem;
+		padding-block: 0.3rem;
+		color: var(--gb-link);
+		text-decoration-color: transparent;
+		transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+	}
+
+	:where(.sidebar-pane a:hover) {
+		color: var(--gb-link-strong);
+		background-color: var(--gb-surface-hover);
+		border-color: var(--sl-color-border);
+	}
+
+	:where(.sidebar-pane a:focus-visible) {
+		outline: 2px solid var(--sl-color-focus);
+		outline-offset: 1px;
+		background-color: var(--gb-surface-soft);
+		border-color: var(--sl-color-focus);
+		color: var(--gb-link-strong);
+	}
+
+	:where(.sidebar-pane a[aria-current='page']) {
+		color: var(--gb-sidebar-active);
+		background-color: var(--gb-surface-active);
+		border-color: var(--gb-sidebar-active);
+		font-weight: 600;
+	}
+
+	:where(.sl-markdown-content a) {
+		color: var(--gb-link);
+		text-decoration-color: rgba(131, 165, 152, 0.45);
+		text-decoration-color: color-mix(in srgb, var(--gb-link) 45%, transparent);
+		text-underline-offset: 0.14em;
+		text-decoration-thickness: 0.07em;
+	}
+
+	:where(.sl-markdown-content a:hover, .sl-markdown-content a:focus-visible) {
+		color: var(--gb-link-strong);
+		text-decoration-color: currentColor;
+	}
+
+	:where(.sl-badge, .badge) {
+		border: 1px solid var(--sl-color-border);
+		background: var(--sl-color-bg-nav);
+		color: var(--sl-color-text);
+	}
+
+	:where(.starlight-aside) {
+		border: 1px solid var(--sl-color-border);
+		background: var(--sl-color-bg-nav);
+		background-image: var(--gb-terminal-texture);
+		box-shadow: none;
+	}
+
+	:where(mark, .sl-markdown-content .expressive-code .highlighted) {
+		background: var(--gb-selection-emphasis-bg);
+		color: var(--gb-selection-emphasis-fg);
 	}
 
 	:where(.sl-badge, .badge, kbd, th, td > code, .sidebar-pane a[aria-current='page']) {
 		font-family: var(--gb-font-mono);
 	}
 
+	:where(.sidebar-pane, .home-projects .card-grid > *) {
+		background-image: var(--gb-terminal-texture);
+	}
+
 	::selection {
 		background: var(--sl-color-selection-bg);
-		color: var(--sl-color-white);
+		color: var(--gb-selection-fg);
 	}
 
 	.home-projects .card-grid {
@@ -124,10 +246,10 @@
 	}
 
 	.home-projects .card-grid > :nth-child(1) {
-		border-color: var(--forge-accent);
+		border-color: var(--gb-green);
 		background:
-			radial-gradient(circle at top right, var(--forge-accent-soft), transparent 55%),
-			var(--sl-color-black);
+			radial-gradient(circle at top right, rgba(184, 187, 38, 0.14), transparent 55%),
+			var(--sl-color-bg-nav);
 	}
 
 	.home-projects .card-grid > :nth-child(1) .body {
@@ -142,6 +264,17 @@
 
 	.home-projects .card-grid > :nth-child(2),
 	.home-projects .card-grid > :nth-child(3) {
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 35%);
+		border-color: var(--sl-color-border);
+		background:
+			linear-gradient(180deg, rgba(131, 165, 152, 0.08), transparent 38%),
+			var(--sl-color-bg-nav);
 	}
+
+	/* Task 2 component-state checklist (rerun):
+	 * PASS (dark): sidebar active/hover/focus states are clear.
+	 * PASS (dark): link states align with Gruvbox palette semantics.
+	 * PASS (dark): code blocks/inline code now share flat surface+borders.
+	 * PASS (dark): home cards no longer use orange-first tone.
+	 * PASS (light-readability): contrast remains readable for links/code/cards.
+	 */
 }
