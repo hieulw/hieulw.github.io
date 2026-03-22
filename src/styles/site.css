@@ -1,7 +1,117 @@
 @layer starlight.overrides {
 	:root {
+		color-scheme: dark;
+
+		--gb-bg-0: #1d2021;
+		--gb-bg-1: #282828;
+		--gb-bg-2: #32302f;
+		--gb-bg-3: #3c3836;
+		--gb-fg-0: #ebdbb2;
+		--gb-fg-1: #d5c4a1;
+		--gb-fg-2: #a89984;
+		--gb-green: #b8bb26;
+		--gb-green-soft: #98971a;
+		--gb-yellow: #fabd2f;
+		--gb-yellow-soft: #d79921;
+		--gb-blue: #83a598;
+		--gb-blue-soft: #458588;
+		--gb-orange: #d65d0e;
+
+		--gb-font-mono:
+			'Cascadia Code',
+			'Cascadia Mono',
+			'JetBrains Mono',
+			'Fira Code',
+			'Source Code Pro',
+			Menlo,
+			Monaco,
+			Consolas,
+			'Liberation Mono',
+			monospace;
+
+		--sl-color-black: var(--gb-bg-0);
+		--sl-color-gray-6: var(--gb-bg-1);
+		--sl-color-gray-5: var(--gb-bg-2);
+		--sl-color-gray-4: var(--gb-bg-3);
+		--sl-color-gray-3: #504945;
+		--sl-color-gray-2: var(--gb-fg-2);
+		--sl-color-gray-1: var(--gb-fg-1);
+		--sl-color-white: var(--gb-fg-0);
+
+		--sl-color-accent-low: #334147;
+		--sl-color-accent: var(--gb-blue);
+		--sl-color-accent-high: #9bb8ab;
+
+		--sl-color-bg: var(--gb-bg-0);
+		--sl-color-bg-nav: var(--gb-bg-1);
+		--sl-color-bg-sidebar: var(--gb-bg-1);
+		--sl-color-bg-inline-code: var(--gb-bg-2);
+		--sl-color-text: var(--gb-fg-1);
+		--sl-color-text-accent: var(--gb-blue);
+		--sl-color-text-invert: var(--gb-bg-0);
+		--sl-color-border: var(--gb-bg-3);
+		--sl-color-hairline: #504945;
+		--sl-color-hairline-light: var(--gb-bg-3);
+		--sl-color-focus: var(--gb-yellow);
+		--sl-color-selection-bg: rgba(131, 165, 152, 0.35);
+
 		--forge-accent: #f97316;
 		--forge-accent-soft: rgba(249, 115, 22, 0.15);
+	}
+
+	:root[data-theme='light'] {
+		color-scheme: light;
+
+		--sl-color-black: #f9f5d7;
+		--sl-color-gray-6: #fbf1c7;
+		--sl-color-gray-5: #ebdbb2;
+		--sl-color-gray-4: #d5c4a1;
+		--sl-color-gray-3: #bdae93;
+		--sl-color-gray-2: #7c6f64;
+		--sl-color-gray-1: #504945;
+		--sl-color-white: #3c3836;
+
+		--sl-color-accent-low: #d5d4c4;
+		--sl-color-accent: #458588;
+		--sl-color-accent-high: #076678;
+
+		--sl-color-bg: #f9f5d7;
+		--sl-color-bg-nav: #fbf1c7;
+		--sl-color-bg-sidebar: #fbf1c7;
+		--sl-color-bg-inline-code: #ebdbb2;
+		--sl-color-text: #504945;
+		--sl-color-text-accent: #458588;
+		--sl-color-text-invert: #fbf1c7;
+		--sl-color-border: #d5c4a1;
+		--sl-color-hairline: #d5c4a1;
+		--sl-color-hairline-light: #ebdbb2;
+		--sl-color-focus: #b57614;
+		--sl-color-selection-bg: rgba(69, 133, 136, 0.28);
+
+		/* TODO: tune accent saturation balancing for light mode. */
+		/* TODO: increase card hierarchy separation in light mode. */
+		/* TODO: calibrate callout intensity tuning for light mode. */
+	}
+
+	:where(code, pre, .astro-code, .expressive-code, .sl-markdown-content code, .sl-markdown-content pre) {
+		font-family: var(--gb-font-mono);
+	}
+
+	:where(.sl-markdown-content :not(pre) > code) {
+		background-color: var(--sl-color-bg-inline-code);
+	}
+
+	:where(pre, .astro-code, .expressive-code) {
+		background-color: var(--sl-color-bg-inline-code);
+	}
+
+	:where(.sl-badge, .badge, kbd, th, td > code, .sidebar-pane a[aria-current='page']) {
+		font-family: var(--gb-font-mono);
+	}
+
+	::selection {
+		background: var(--sl-color-selection-bg);
+		color: var(--sl-color-white);
 	}
 
 	.home-projects .card-grid {
