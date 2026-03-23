@@ -70,7 +70,7 @@
 
 		--sl-color-bg: var(--gb-bg-0);
 		--sl-color-bg-nav: var(--gb-bg-1);
-		--sl-color-bg-sidebar: var(--gb-bg-1);
+		--sl-color-bg-sidebar: var(--gb-bg-0);
 		--sl-color-bg-inline-code: var(--gb-bg-2);
 		--sl-color-text: var(--gb-fg-1);
 		--sl-color-text-accent: var(--gb-blue);
@@ -125,7 +125,7 @@
 
 		--sl-color-bg: var(--gb-light-bg-0);
 		--sl-color-bg-nav: var(--gb-light-bg-1);
-		--sl-color-bg-sidebar: var(--gb-light-bg-1);
+		--sl-color-bg-sidebar: var(--gb-light-bg-0);
 		--sl-color-bg-inline-code: var(--gb-light-bg-2);
 		--sl-color-text: var(--gb-light-fg-1);
 		--sl-color-text-accent: var(--gb-light-green);
@@ -344,6 +344,25 @@
 
 	:where(.sidebar-pane) {
 		background-image: none;
+	}
+
+	:where(div.sidebar-pane) {
+		border-right: 1px solid var(--sl-color-border);
+	}
+
+	/* :where(div.right-sidebar) { */
+	/* 	border-left: 0px ; */
+	/* } */
+
+	:where(header.header) {
+		border-bottom: 1px solid var(--sl-color-border);
+	}
+
+
+	@media (min-width: 50rem) {
+		:where(nav.sidebar) {
+			border-inline-end: 1px solid var(--sl-color-border);
+		}
 	}
 
 	::selection {
