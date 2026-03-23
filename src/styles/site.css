@@ -31,11 +31,6 @@
 		--gb-blue-soft: #458588;
 		--gb-orange: #d65d0e;
 
-		/* Task 1 verification:
-		 * PASS: dark/light theme token coverage rerun for --sl-color-* in this block.
-		 * PASS: CSS entrypoint check source: astro.config.mjs customCss -> ['./src/styles/site.css'].
-		 */
-
 		--sl-color-black: var(--gb-bg-0);
 		--sl-color-gray-6: var(--gb-bg-1);
 		--sl-color-gray-5: var(--gb-bg-2);
@@ -64,6 +59,7 @@
 
 		--gb-link: var(--gb-blue);
 		--gb-link-strong: #a7c0b6;
+		--gb-link-underline: rgba(131, 165, 152, 0.45);
 		--gb-inline-code-fg: var(--gb-yellow-soft);
 		--gb-sidebar-active: var(--gb-green);
 		--gb-surface-soft: rgba(235, 219, 178, 0.03);
@@ -111,6 +107,7 @@
 
 		--gb-link: var(--sl-color-accent);
 		--gb-link-strong: var(--sl-color-accent-high);
+		--gb-link-underline: rgba(131, 165, 152, 0.45);
 		--gb-inline-code-fg: var(--sl-color-accent-high);
 		--gb-sidebar-active: #79740e;
 		--gb-surface-soft: rgba(80, 73, 69, 0.04);
@@ -127,20 +124,6 @@
 		--gb-terminal-texture: var(--gb-flat-texture);
 
 	}
-
-	/* Task 2 component-state checklist (initial run):
-	 * FAIL: sidebar active/hover/focus states are unclear.
-	 * FAIL: link states do not match palette semantics.
-	 * FAIL: code blocks look disconnected from surface system.
-	 * FAIL: home cards keep previous orange-centric tone.
-	 */
-
-	/* Task 1 flatness checklist (initial run):
-	 * FAIL: cards or card icons show drop shadow/glow.
-	 * FAIL: sidebar or dialogs show shadow halo.
-	 * FAIL: asides/code containers show elevated shadow depth.
-	 * FAIL: button-like controls rely on shadow rather than border/contrast.
-	 */
 
 	:where(
 		.card,
@@ -268,7 +251,7 @@
 
 	:where(.sl-markdown-content a) {
 		color: var(--gb-link);
-		text-decoration-color: rgba(131, 165, 152, 0.45);
+		text-decoration-color: var(--gb-link-underline);
 		text-decoration-color: color-mix(in srgb, var(--gb-link) 45%, transparent);
 		text-underline-offset: 0.14em;
 		text-decoration-thickness: 0.07em;
@@ -336,19 +319,3 @@
 		background-color: var(--sl-color-bg-nav);
 		background-image: none;
 	}
-
-	/* Task 1 flatness checklist (rerun):
-	 * PASS (dark): cards/card icons render with zero shadow or glow depth.
-	 * PASS (dark): sidebar panes, dialogs, and search surfaces have no halo.
-	 * PASS (dark): aside/code containers stay flat with border-only separation.
-	 * PASS (dark): button-like controls rely on border/color/outline, not shadow.
-	 * PASS (light-readability): hard-flat selectors remain readable and contrast-clear.
-	 */
-
-	/* Task 2 component-state checklist (rerun):
-	 * PASS (dark): sidebar active/hover/focus states are clear.
-	 * PASS (dark): link states align with Gruvbox palette semantics.
-	 * PASS (dark): code blocks/inline code now share flat surface+borders.
-	 * PASS (dark): home cards no longer use orange-first tone.
-	 * PASS (light-readability): contrast remains readable for links/code/cards.
-	 */
