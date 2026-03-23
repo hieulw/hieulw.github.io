@@ -13,12 +13,15 @@ Personal documentation site built with Astro + Starlight.
 
 All docs content lives in `src/content/docs/`.
 
-- `programming/`
-- `devops/`
-- `tools/`
-- `til/`
-- `career/`
-- `templates/`
+- `index.mdx` - docs landing page
+- `forge/` - Forge notes and implementation docs
+
+## Writing guidelines
+
+- Keep article titles short and concise.
+- Do not repeat folder/category names in article titles when context is already clear from the path (for example, docs under `forge/` should not include `Forge` in the title).
+
+Project-specific content rules live in `AGENTS.md`.
 
 ## Deployment
 
