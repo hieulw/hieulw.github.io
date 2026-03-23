@@ -72,6 +72,7 @@
 		--gb-flat-text-shadow: none;
 		--gb-flat-glow: none;
 		--gb-flat-filter: none;
+		--gb-flat-radius: 0px;
 		--gb-flat-texture: none;
 		--gb-terminal-texture: var(--gb-flat-texture);
 	}
@@ -120,6 +121,7 @@
 		--gb-flat-text-shadow: none;
 		--gb-flat-glow: none;
 		--gb-flat-filter: none;
+		--gb-flat-radius: 0px;
 		--gb-flat-texture: none;
 		--gb-terminal-texture: var(--gb-flat-texture);
 
@@ -165,7 +167,7 @@
 		background-color: var(--sl-color-bg-inline-code);
 		background-color: color-mix(in srgb, var(--sl-color-bg-inline-code) 92%, var(--sl-color-bg) 8%);
 		padding: 0.08rem 0.35rem;
-		border-radius: 0.26rem;
+		border-radius: var(--gb-flat-radius);
 	}
 
 	@media print {
@@ -178,9 +180,9 @@
 
 	:where(.pagination-links a) {
 		border: 1px solid transparent;
-		border-radius: 0.4rem;
+		border-radius: var(--gb-flat-radius);
 		background-color: transparent;
-		transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+		transition: none;
 	}
 
 	:where(.pagination-links a:hover) {
@@ -219,12 +221,12 @@
 	:where(.sidebar-content a) {
 		display: block;
 		border: 1px solid transparent;
-		border-radius: 0.34rem;
+		border-radius: var(--gb-flat-radius);
 		padding-inline: 0.45rem;
 		padding-block: 0.3rem;
 		color: var(--gb-link);
 		text-decoration-color: transparent;
-		transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+		transition: none;
 	}
 
 	:where(.sidebar-content a:hover) {
@@ -318,4 +320,39 @@
 		border-color: var(--sl-color-border);
 		background-color: var(--sl-color-bg-nav);
 		background-image: none;
+	}
+
+	:where(
+		a,
+		button,
+		[role='button'],
+		input:not([type='hidden']),
+		select,
+		textarea,
+		summary,
+		[role='tab'],
+		.card,
+		.card .icon,
+		.card-grid > *,
+		.sidebar-pane,
+		.starlight-aside,
+		.pagination-links a,
+		.sl-link-button,
+		.sl-badge,
+		.badge,
+		pre,
+		.astro-code,
+		.expressive-code,
+		site-search,
+		site-search .dialog-frame,
+		site-search .search-container,
+		site-search .dropdown,
+		#starlight__search,
+		#starlight__search .dialog-frame,
+		#starlight__search .search-container,
+		#starlight__search .dropdown
+	) {
+		border-radius: var(--gb-flat-radius) !important;
+		transition: none !important;
+		animation: none !important;
 	}
