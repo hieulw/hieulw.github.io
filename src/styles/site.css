@@ -1,5 +1,6 @@
 @layer starlight.overrides {
-	:root {
+	html:root:not([data-theme]),
+	html:root[data-theme='dark'] {
 		color-scheme: dark;
 
 		--gb-bg-0: #1d2021;
@@ -70,11 +71,15 @@
 		--gb-selection-fg: var(--gb-fg-0);
 		--gb-selection-emphasis-bg: rgba(214, 93, 14, 0.34);
 		--gb-selection-emphasis-fg: #fbf1c7;
-		--gb-terminal-texture:
-			repeating-linear-gradient(0deg, rgba(235, 219, 178, 0.02) 0 1px, transparent 1px 4px);
+		--gb-flat-shadow: none;
+		--gb-flat-text-shadow: none;
+		--gb-flat-glow: none;
+		--gb-flat-filter: none;
+		--gb-flat-texture: none;
+		--gb-terminal-texture: var(--gb-flat-texture);
 	}
 
-	:root[data-theme='light'] {
+	html:root[data-theme='light'] {
 		color-scheme: light;
 
 		--sl-color-black: #f9f5d7;
@@ -113,8 +118,12 @@
 		--gb-selection-fg: #3c3836;
 		--gb-selection-emphasis-bg: rgba(214, 93, 14, 0.24);
 		--gb-selection-emphasis-fg: #3c3836;
-		--gb-terminal-texture:
-			repeating-linear-gradient(0deg, rgba(60, 56, 54, 0.03) 0 1px, transparent 1px 4px);
+		--gb-flat-shadow: none;
+		--gb-flat-text-shadow: none;
+		--gb-flat-glow: none;
+		--gb-flat-filter: none;
+		--gb-flat-texture: none;
+		--gb-terminal-texture: var(--gb-flat-texture);
 
 		/* TODO: tune accent saturation balancing for light mode. */
 		/* TODO: increase card hierarchy separation in light mode. */
@@ -127,6 +136,39 @@
 	 * FAIL: code blocks look disconnected from surface system.
 	 * FAIL: home cards keep previous orange-centric tone.
 	 */
+
+	/* Task 1 flatness checklist (initial run):
+	 * FAIL: cards or card icons show drop shadow/glow.
+	 * FAIL: sidebar or dialogs show shadow halo.
+	 * FAIL: asides/code containers show elevated shadow depth.
+	 * FAIL: button-like controls rely on shadow rather than border/contrast.
+	 */
+
+	:where(
+		.card,
+		.card-grid,
+		.home-projects .card-grid,
+		.card .icon,
+		.home-projects .card-grid .icon,
+		.sidebar-pane,
+		.starlight-aside,
+		.sidebar-content a,
+		pre,
+		.astro-code,
+		.expressive-code,
+		.pagination-links a,
+		.sl-link-button,
+		button,
+		[role='button'],
+		site-search,
+		.dialog-frame,
+		.search-container,
+		#starlight__search
+	) {
+		box-shadow: var(--gb-flat-shadow) !important;
+		text-shadow: var(--gb-flat-text-shadow);
+		filter: var(--gb-flat-filter);
+	}
 
 	:where(code, pre, .astro-code, .expressive-code, .sl-markdown-content code, .sl-markdown-content pre) {
 		font-family: var(--gb-font-mono);
@@ -142,9 +184,9 @@
 	}
 
 	@media print {
-		:root,
-		:root[data-theme='light'],
-		:root[data-theme='dark'] {
+		html:root:not([data-theme]),
+		html:root[data-theme='light'],
+		html:root[data-theme='dark'] {
 			--gb-inline-code-fg: #3c3836;
 		}
 	}
@@ -170,7 +212,7 @@
 	:where(pre, .astro-code, .expressive-code) {
 		background: var(--sl-color-bg-nav);
 		border: 1px solid var(--sl-color-border);
-		box-shadow: none;
+		box-shadow: var(--gb-flat-shadow);
 		background-image: var(--gb-terminal-texture);
 		background-blend-mode: normal;
 	}
@@ -229,8 +271,8 @@
 	:where(.starlight-aside) {
 		border: 1px solid var(--sl-color-border);
 		background: var(--sl-color-bg-nav);
-		background-image: var(--gb-terminal-texture);
-		box-shadow: none;
+		background-image: none;
+		box-shadow: var(--gb-flat-shadow);
 	}
 
 	:where(mark, .sl-markdown-content .expressive-code .highlighted) {
@@ -243,7 +285,7 @@
 	}
 
 	:where(.sidebar-pane) {
-		background-image: var(--gb-terminal-texture);
+		background-image: none;
 	}
 
 	::selection {
@@ -258,9 +300,7 @@
 	.home-projects .card-grid > :nth-child(1) {
 		border-color: var(--gb-green);
 		background-color: var(--sl-color-bg-nav);
-		background-image:
-			radial-gradient(circle at top right, rgba(184, 187, 38, 0.14), transparent 55%),
-			var(--gb-terminal-texture);
+		background-image: none;
 	}
 
 	.home-projects .card-grid > :nth-child(1) .body {
@@ -277,10 +317,16 @@
 	.home-projects .card-grid > :nth-child(3) {
 		border-color: var(--sl-color-border);
 		background-color: var(--sl-color-bg-nav);
-		background-image:
-			linear-gradient(180deg, rgba(131, 165, 152, 0.08), transparent 38%),
-			var(--gb-terminal-texture);
+		background-image: none;
 	}
+
+	/* Task 1 flatness checklist (rerun):
+	 * PASS (dark): cards/card icons render with zero shadow or glow depth.
+	 * PASS (dark): sidebar panes, dialogs, and search surfaces have no halo.
+	 * PASS (dark): aside/code containers stay flat with border-only separation.
+	 * PASS (dark): button-like controls rely on border/color/outline, not shadow.
+	 * PASS (light-readability): hard-flat selectors remain readable and contrast-clear.
+	 */
 
 	/* Task 2 component-state checklist (rerun):
 	 * PASS (dark): sidebar active/hover/focus states are clear.
