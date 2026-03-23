@@ -160,11 +160,7 @@
 		button,
 		[role='button'],
 		site-search,
-		dialog,
-		[role='dialog'],
 		site-search .dropdown,
-		dialog .dropdown,
-		[role='dialog'] .dropdown,
 		.dialog-frame .dropdown,
 		.search-container .dropdown,
 		#starlight__search .dropdown,
@@ -216,7 +212,21 @@
 		border-color: var(--sl-color-focus);
 	}
 
-	:is(button, [role='button'], .sl-link-button, input, select, textarea, [type='search']):focus-visible {
+	:is(
+		button,
+		[role='button'],
+		.sl-link-button,
+		select,
+		textarea,
+		input:not([type]),
+		input[type='text'],
+		input[type='search'],
+		input[type='email'],
+		input[type='password'],
+		input[type='url'],
+		input[type='tel'],
+		input[type='number']
+	):focus-visible {
 		outline: 2px solid var(--sl-color-focus);
 		outline-offset: 1px;
 		border-color: var(--sl-color-focus);
