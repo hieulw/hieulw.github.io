@@ -160,6 +160,9 @@
 		button,
 		[role='button'],
 		site-search,
+		dialog,
+		[role='dialog'],
+		.dropdown,
 		.dialog-frame,
 		.search-container,
 		#starlight__search
@@ -212,6 +215,7 @@
 		outline: 2px solid var(--sl-color-focus);
 		outline-offset: 1px;
 		border-color: var(--sl-color-focus);
+		box-shadow: none !important;
 	}
 
 	:where(pre, .astro-code, .expressive-code) {
@@ -245,6 +249,7 @@
 		background-color: var(--gb-surface-soft);
 		border-color: var(--sl-color-focus);
 		color: var(--gb-link-strong);
+		box-shadow: none !important;
 	}
 
 	:where(.sidebar-content a[aria-current='page']) {
