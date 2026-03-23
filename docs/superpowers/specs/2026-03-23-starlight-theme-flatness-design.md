@@ -31,7 +31,9 @@ The prior theme pass established palette/token mapping and component retone, but
    - pagination and button-like controls
    - search/dialog wrappers
 3. Keep borders and contrast transitions for affordance, replacing depth with crisp edge definition.
-4. Reduce decorative texture so it reads as terminal atmosphere, not visual depth.
+4. Reduce decorative texture to non-depth levels:
+   - remove texture from card/aside/code surfaces, or
+   - keep only one texture source at opacity <= 0.01 and no blend-mode that increases perceived depth.
 
 ## Targeted Selector Families
 
@@ -39,13 +41,14 @@ The prior theme pass established palette/token mapping and component retone, but
 - `.sidebar-pane`, `.sidebar-content a`, `.pagination-links a`
 - `.starlight-aside`
 - `pre`, `.astro-code`, `.expressive-code`
-- Search/dialog containers rendered by Starlight header/search controls
+- `site-search`, `.dialog-frame`, `.search-container`, `#starlight__search`
 
 Exact selectors may be adjusted to match current emitted markup but must stay tightly scoped to Starlight surfaces.
 
 ## Acceptance Criteria
 
 - No visible drop shadows or glow halos on primary surfaces in dark mode.
+- No visible drop shadows or glow halos on primary surfaces in light mode.
 - Light mode preserves readability and consistent flat styling.
 - Focus indicators remain clearly visible via borders/outlines, not glow effects.
 - `npm run build` passes.
