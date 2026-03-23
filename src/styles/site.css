@@ -1,3 +1,17 @@
+	html:root {
+		--gb-font-mono:
+			'Cascadia Code',
+			'Cascadia Mono',
+			'JetBrains Mono',
+			'Fira Code',
+			'Source Code Pro',
+			Menlo,
+			Monaco,
+			Consolas,
+			'Liberation Mono',
+			monospace;
+	}
+
 	html:root:not([data-theme]),
 	html:root[data-theme='dark'] {
 		color-scheme: dark;
@@ -16,18 +30,6 @@
 		--gb-blue: #83a598;
 		--gb-blue-soft: #458588;
 		--gb-orange: #d65d0e;
-
-		--gb-font-mono:
-			'Cascadia Code',
-			'Cascadia Mono',
-			'JetBrains Mono',
-			'Fira Code',
-			'Source Code Pro',
-			Menlo,
-			Monaco,
-			Consolas,
-			'Liberation Mono',
-			monospace;
 
 		/* Task 1 verification:
 		 * PASS: dark/light theme token coverage rerun for --sl-color-* in this block.
@@ -124,9 +126,6 @@
 		--gb-flat-texture: none;
 		--gb-terminal-texture: var(--gb-flat-texture);
 
-		/* TODO: tune accent saturation balancing for light mode. */
-		/* TODO: increase card hierarchy separation in light mode. */
-		/* TODO: calibrate callout intensity tuning for light mode. */
 	}
 
 	/* Task 2 component-state checklist (initial run):
