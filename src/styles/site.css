@@ -162,7 +162,12 @@
 		site-search,
 		dialog,
 		[role='dialog'],
-		.dropdown,
+		site-search .dropdown,
+		dialog .dropdown,
+		[role='dialog'] .dropdown,
+		.dialog-frame .dropdown,
+		.search-container .dropdown,
+		#starlight__search .dropdown,
 		.dialog-frame,
 		.search-container,
 		#starlight__search
@@ -211,7 +216,7 @@
 		border-color: var(--sl-color-focus);
 	}
 
-	:is(button, [role='button'], .sl-link-button):focus-visible {
+	:is(button, [role='button'], .sl-link-button, input, select, textarea, [type='search']):focus-visible {
 		outline: 2px solid var(--sl-color-focus);
 		outline-offset: 1px;
 		border-color: var(--sl-color-focus);
