@@ -29,7 +29,7 @@ to:
 
 ---
 
-### Common Configuration Patterns in Go
+## Common Configuration Patterns in Go
 
 Different teams gravitate toward different approaches. Each solves a real problem, but each also introduces its own friction when systems scale.
 
@@ -179,30 +179,30 @@ This pattern is great for **tools, CLIs, and platform-style apps**, but backend 
 
 ---
 
-### Patterns That Matter More Than the Library
+## Patterns That Matter More Than the Library
 
 Regardless of tooling, production systems tend to succeed when they follow a few principles.
 
-#### Typed Configuration Early
+### Typed Configuration Early
 
 Convert raw strings into typed values at startup.
 Avoid string parsing deep in business logic.
 
-#### Fail Fast
+### Fail Fast
 
 Invalid configuration should stop the application immediately.
 Silent defaults often hide production issues.
 
-#### Immutable After Startup
+### Immutable After Startup
 
 Load configuration once.
 Avoid runtime mutation unless absolutely necessary.
 
-#### Explicit Ownership
+### Explicit Ownership
 
 Each component should clearly declare what configuration it needs.
 
-#### Boundary Injection
+### Boundary Injection
 
 Configuration should enter the system at the bootstrap layer and flow inward, never the reverse.
 
@@ -210,7 +210,7 @@ These principles shape architecture more than any library choice.
 
 ---
 
-### A Balanced Approach: Loader + Package-Owned Config
+## A Balanced Approach: Loader + Package-Owned Config
 
 A scalable pattern emerges when combining these ideas:
 
@@ -320,7 +320,7 @@ This file becomes the **composition root** for configuration.
 
 ---
 
-### Why This Pattern Scales
+## Why This Pattern Scales
 
 This design naturally satisfies production best practices:
 
@@ -335,11 +335,11 @@ The architecture remains clear even as services grow.
 
 ---
 
-### Things to Watch Out For
+## Things to Watch Out For
 
 This approach works best when applied thoughtfully.
 
-#### Not Every Package Needs Config
+### Not Every Package Needs Config
 
 Only runtime components should define configuration:
 
@@ -350,18 +350,18 @@ Only runtime components should define configuration:
 
 Utility packages rarely need runtime config.
 
-#### Avoid Reflection-Based Magic
+### Avoid Reflection-Based Magic
 
 Keep the loader simple.
 When config loading becomes a mini-framework, debugging becomes harder.
 
-#### Prefer Structs Over Excessive Functional Options
+### Prefer Structs Over Excessive Functional Options
 
 Functional options are useful for optional behavior, but runtime configuration is clearer when expressed as data.
 
 ---
 
-### Conclusion
+## Conclusion
 
 Configuration in Go is less about picking the right library and more about drawing clean boundaries.
 

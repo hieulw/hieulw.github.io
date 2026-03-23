@@ -1,8 +1,7 @@
 # Content Rules
 
 - Keep docs article titles short and concise.
-- In docs pages with frontmatter `title`, do not use `#` headings in body content; start sections at `###`.
-- Avoid `##` headings in docs body content; use `###` and deeper levels going forward.
+- In docs pages with frontmatter `title`, do not use `#` headings in body content; start sections at `##`.
 - Do not use ordered numbering in section headers (e.g., avoid `## 1. Setup`); use plain, descriptive header text.
 - Do not repeat folder/category names in article titles when context is already clear from the path (e.g., content under `forge/` should not include `Forge` in the title).
 - Use `Aside` components sparingly, only when a point truly needs callout emphasis.
