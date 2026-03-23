@@ -15,6 +15,9 @@ export default defineConfig({
 			title: "Hieu's Knowledge Base",
 			description: 'Code. Systems. Growth.',
 			customCss: ['./src/styles/site.css'],
+			expressiveCode: {
+				themes: ['gruvbox-dark-hard', 'gruvbox-light-hard'],
+			},
 			sidebar: [{ label: 'Forge', autogenerate: { directory: 'forge' } }],
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/hieulw' }],
 			editLink: {

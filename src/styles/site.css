@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cascadia+Code:wght@400;500;600;700&display=swap');
+
 	html:root {
 		--gb-font-mono:
 			'Cascadia Code',
@@ -42,7 +44,7 @@
 
 		--sl-color-accent-low: #334147;
 		--sl-color-accent: var(--gb-blue);
-		--sl-color-accent-high: #9bb8ab;
+		--sl-color-accent-high: #b8ccc4;
 
 		--sl-color-bg: var(--gb-bg-0);
 		--sl-color-bg-nav: var(--gb-bg-1);
@@ -61,10 +63,10 @@
 		--gb-link-strong: #a7c0b6;
 		--gb-link-underline: rgba(131, 165, 152, 0.45);
 		--gb-inline-code-fg: var(--gb-yellow-soft);
-		--gb-sidebar-active: var(--gb-green);
+		--gb-sidebar-active: var(--gb-blue);
 		--gb-surface-soft: rgba(235, 219, 178, 0.03);
 		--gb-surface-hover: rgba(131, 165, 152, 0.14);
-		--gb-surface-active: rgba(184, 187, 38, 0.16);
+		--gb-surface-active: rgba(131, 165, 152, 0.14);
 		--gb-selection-fg: var(--gb-fg-0);
 		--gb-selection-emphasis-bg: rgba(214, 93, 14, 0.34);
 		--gb-selection-emphasis-fg: #fbf1c7;
@@ -89,16 +91,16 @@
 		--sl-color-gray-1: #504945;
 		--sl-color-white: #3c3836;
 
-		--sl-color-accent-low: #d5d4c4;
-		--sl-color-accent: #458588;
-		--sl-color-accent-high: #076678;
+		--sl-color-accent-low: #e8e3bf;
+		--sl-color-accent: #79740e;
+		--sl-color-accent-high: #427b58;
 
 		--sl-color-bg: #f9f5d7;
 		--sl-color-bg-nav: #fbf1c7;
 		--sl-color-bg-sidebar: #fbf1c7;
 		--sl-color-bg-inline-code: #ebdbb2;
 		--sl-color-text: #504945;
-		--sl-color-text-accent: #458588;
+		--sl-color-text-accent: #79740e;
 		--sl-color-text-invert: #fbf1c7;
 		--sl-color-border: #d5c4a1;
 		--sl-color-hairline: #d5c4a1;
@@ -110,10 +112,10 @@
 		--gb-link-strong: var(--sl-color-accent-high);
 		--gb-link-underline: rgba(131, 165, 152, 0.45);
 		--gb-inline-code-fg: var(--sl-color-accent-high);
-		--gb-sidebar-active: #79740e;
+		--gb-sidebar-active: #98971a;
 		--gb-surface-soft: rgba(80, 73, 69, 0.04);
 		--gb-surface-hover: rgba(69, 133, 136, 0.12);
-		--gb-surface-active: rgba(121, 116, 14, 0.14);
+		--gb-surface-active: rgba(131, 165, 152, 0.14);
 		--gb-selection-fg: #3c3836;
 		--gb-selection-emphasis-bg: rgba(214, 93, 14, 0.24);
 		--gb-selection-emphasis-fg: #3c3836;
@@ -247,8 +249,6 @@
 	:where(.sidebar-content a[aria-current='page']) {
 		color: var(--gb-sidebar-active);
 		background-color: var(--gb-surface-active);
-		border-color: var(--gb-sidebar-active);
-		font-weight: 600;
 	}
 
 	:where(.sl-markdown-content a) {
@@ -282,7 +282,7 @@
 		color: var(--gb-selection-emphasis-fg);
 	}
 
-	:where(.sl-badge, .badge, kbd, th, td > code, .sidebar-content a[aria-current='page']) {
+	:where(.sl-badge, .badge, kbd, th, td > code) {
 		font-family: var(--gb-font-mono);
 	}
 
