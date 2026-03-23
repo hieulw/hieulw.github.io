@@ -12,7 +12,7 @@ export default defineConfig({
 	},
 	integrations: [
 		starlight({
-			title: "Hieu's Knowledge Base",
+			title: "hieulw",
 			description: 'Code. Systems. Growth.',
 			customCss: ['./src/styles/site.css'],
 			expressiveCode: {
