@@ -89,6 +89,12 @@
 		--gb-surface-soft: rgba(235, 219, 178, 0.03);
 		--gb-surface-hover: rgba(131, 165, 152, 0.14);
 		--gb-surface-active: rgba(131, 165, 152, 0.14);
+		--gb-aside-tip-border: var(--gb-green);
+		--gb-aside-tip-bg: rgba(184, 187, 38, 0.2);
+		--gb-aside-tip-accent: var(--gb-green);
+		--gb-aside-caution-border: var(--gb-orange);
+		--gb-aside-caution-bg: rgba(214, 93, 14, 0.2);
+		--gb-aside-caution-accent: #fe8019;
 		--gb-selection-fg: var(--gb-fg-0);
 		--gb-selection-emphasis-bg: rgba(214, 93, 14, 0.34);
 		--gb-selection-emphasis-fg: #fbf1c7;
@@ -138,6 +144,12 @@
 		--gb-surface-soft: rgba(80, 73, 69, 0.04);
 		--gb-surface-hover: rgba(69, 133, 136, 0.12);
 		--gb-surface-active: rgba(131, 165, 152, 0.14);
+		--gb-aside-tip-border: var(--gb-light-green);
+		--gb-aside-tip-bg: rgba(121, 116, 14, 0.2);
+		--gb-aside-tip-accent: var(--gb-light-green);
+		--gb-aside-caution-border: #b57614;
+		--gb-aside-caution-bg: rgba(175, 58, 3, 0.18);
+		--gb-aside-caution-accent: #af3a03;
 		--gb-selection-fg: #3c3836;
 		--gb-selection-emphasis-bg: rgba(214, 93, 14, 0.24);
 		--gb-selection-emphasis-fg: #3c3836;
@@ -297,6 +309,28 @@
 		background: var(--sl-color-bg-nav);
 		background-image: none;
 		box-shadow: var(--gb-flat-shadow);
+	}
+
+	:where(.starlight-aside--tip, .starlight-aside[data-type='tip']) {
+		border-color: var(--gb-aside-tip-border);
+		border-inline-start-color: var(--gb-aside-tip-border);
+		background: var(--gb-aside-tip-bg);
+	}
+
+	:where(.starlight-aside--tip, .starlight-aside[data-type='tip'])
+		:is(.starlight-aside__title, .starlight-aside__icon) {
+		color: var(--gb-aside-tip-accent);
+	}
+
+	:where(.starlight-aside--caution, .starlight-aside[data-type='caution']) {
+		border-color: var(--gb-aside-caution-border);
+		border-inline-start-color: var(--gb-aside-caution-border);
+		background: var(--gb-aside-caution-bg);
+	}
+
+	:where(.starlight-aside--caution, .starlight-aside[data-type='caution'])
+		:is(.starlight-aside__title, .starlight-aside__icon) {
+		color: var(--gb-aside-caution-accent);
 	}
 
 	:where(mark, .sl-markdown-content .expressive-code .highlighted) {
