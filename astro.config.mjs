@@ -15,6 +15,10 @@ export default defineConfig({
 			title: "hieulw",
 			description: 'Code. Systems. Growth.',
 			customCss: ['./src/styles/site.css'],
+			tableOfContents: {
+				minHeadingLevel: 2,
+				maxHeadingLevel: 4,
+			},
 			expressiveCode: {
 				themes: ['gruvbox-dark-hard', 'gruvbox-light-hard'],
 			},
