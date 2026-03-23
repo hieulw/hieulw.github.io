@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import starlightSidebarTopics from 'starlight-sidebar-topics';
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,19 +15,11 @@ export default defineConfig({
 			title: "Hieu's Knowledge Base",
 			description: 'Code. Systems. Growth.',
 			customCss: ['./src/styles/site.css'],
+			sidebar: [{ label: 'Forge', autogenerate: { directory: 'forge' } }],
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/hieulw' }],
 			editLink: {
 				baseUrl: 'https://github.com/hieulw/hieulw.github.io/edit/main/',
 			},
-			plugins: [
-				starlightSidebarTopics([
-					{
-						label: 'Forge',
-						link: '/forge/',
-						items: [{ label: 'Forge', autogenerate: { directory: 'forge' } }],
-					},
-				]),
-			],
 		}),
 	],
 });
