@@ -160,12 +160,12 @@
 		button,
 		[role='button'],
 		site-search,
+		site-search .dialog-frame,
+		site-search .search-container,
 		site-search .dropdown,
-		.dialog-frame .dropdown,
-		.search-container .dropdown,
+		#starlight__search .dialog-frame,
+		#starlight__search .search-container,
 		#starlight__search .dropdown,
-		.dialog-frame,
-		.search-container,
 		#starlight__search
 	) {
 		box-shadow: var(--gb-flat-shadow) !important;
@@ -218,14 +218,7 @@
 		.sl-link-button,
 		select,
 		textarea,
-		input:not([type]),
-		input[type='text'],
-		input[type='search'],
-		input[type='email'],
-		input[type='password'],
-		input[type='url'],
-		input[type='tel'],
-		input[type='number']
+		input:not([type='hidden'])
 	):focus-visible {
 		outline: 2px solid var(--sl-color-focus);
 		outline-offset: 1px;
