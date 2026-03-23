@@ -18,7 +18,7 @@ The short answer in Forge:
 
 ---
 
-## Why This Boundary Matters
+### Why This Boundary Matters
 
 Suppose one use case needs these steps:
 
@@ -33,11 +33,11 @@ If each repository method starts and commits its own transaction, cross-reposito
 
 ---
 
-## sqlc-Friendly Structure in Forge
+### sqlc-Friendly Structure in Forge
 
 `sqlc` typically generates:
 
-```go
+```go title="internal/db/queries.go"
 type Queries struct {
     db DBTX
 }
@@ -50,11 +50,11 @@ That `WithTx` is the key: your repositories can receive `*db.Queries`, and a tra
 
 ---
 
-## A Practical Pattern
+### A Practical Pattern
 
-### 1) Transaction runner in infrastructure
+#### Transaction Runner in Infrastructure
 
-```go
+```go title="internal/infra/tx/runner.go"
 type TxRunner interface {
     WithinTx(ctx context.Context, fn func(q *db.Queries) error) error
 }
@@ -80,9 +80,9 @@ func (r *SQLCTxRunner) WithinTx(ctx context.Context, fn func(q *db.Queries) erro
 }
 ```
 
-### 2) Repositories use `*db.Queries`
+#### Repositories Use `*db.Queries`
 
-```go
+```go title="internal/order/repository.go"
 type OrderRepository struct {
     q *db.Queries
 }
@@ -97,9 +97,9 @@ func (r *OrderRepository) Create(ctx context.Context, arg db.CreateOrderParams) 
 }
 ```
 
-### 3) Service controls atomic boundary
+#### Service Controls Atomic Boundary
 
-```go
+```go title="internal/order/place_order_service.go"
 type PlaceOrderService struct {
     txRunner TxRunner
 }
@@ -128,7 +128,7 @@ This keeps service-level intent clear: "these operations succeed or fail togethe
 
 ---
 
-## Rule of Thumb for Forge + sqlc
+### Rule of Thumb for Forge + sqlc
 
 - Keep `BEGIN/COMMIT/ROLLBACK` in a transaction runner, not in repository methods.
 - Keep repositories small and query-focused.
@@ -138,10 +138,10 @@ This keeps service-level intent clear: "these operations succeed or fail togethe
 
 ---
 
-## Optional Improvement: Context-Based Query Access
+### Optional Improvement: Context-Based Query Access
 
 If you want to avoid rebuilding repositories inside `WithinTx`, you can store transaction-aware `*db.Queries` in context and use a query provider in repositories. It can reduce boilerplate, but it also hides dependencies. In most Forge services, explicit injection inside `WithinTx` is clearer and easier to test.
 
-## Final Take
+### Final Take
 
 In Forge with `sqlc`, use transaction runners for mechanics and services for transactional intent. This gives you clean boundaries, easier tests, and reliable multi-repository atomic behavior.
