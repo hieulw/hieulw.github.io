@@ -1,0 +1,416 @@
+---
+title: "Config Patterns"
+description: "Configuration in Go: It’s Not About the Library, It’s About the Architecture"
+pubDate: "2026-03-23"
+tags: ["golang", "configuration", "service-architecture", "forge"]
+heroImage: ""
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Every application needs configuration. Ports, database URLs, feature toggles, retry limits — these values differ between environments and deployments.
+
+The [Twelve-Factor App](https://12factor.net/config) recommends storing configuration in the environment and separating it from code. That principle is straightforward. The tricky part appears when a Go codebase grows beyond a single service.
+
+Once you have:
+
+* multiple executables
+* modular monolith boundaries
+* shared infrastructure components
+* plans to evolve into microservices
+
+configuration stops being a parsing problem and becomes an **architectural decision**.
+
+At that point, the question changes from:
+
+> “Which config library should I use?”
+
+to:
+
+> “Where should configuration live in my system?”
+
+---
+
+# Common Configuration Patterns in Go
+
+Different teams gravitate toward different approaches. Each solves a real problem, but each also introduces its own friction when systems scale.
+
+To make the tradeoffs clearer, let’s walk through them with realistic project layouts.
+
+---
+
+# Handwritten Loader (Fully Explicit)
+
+This is the “no abstraction” approach. Everything is written manually.
+
+```
+internal/config/env.go
+cmd/users/config.go
+```
+
+### internal/config/env.go
+
+```go
+package config
+
+import (
+    "os"
+    "strconv"
+)
+
+func String(key, def string) string {
+    if v := os.Getenv(key); v != "" {
+        return v
+    }
+    return def
+}
+
+func Int(key string, def int) (int, error) {
+    v := os.Getenv(key)
+    if v == "" {
+        return def, nil
+    }
+    return strconv.Atoi(v)
+}
+```
+
+### cmd/users/config.go
+
+```go
+type Config struct {
+    HTTPPort int
+    DBURL    string
+}
+
+func LoadConfig() (Config, error) {
+    port, err := config.Int("USERS_HTTP_PORT", 8080)
+    if err != nil {
+        return Config{}, err
+    }
+
+    return Config{
+        HTTPPort: port,
+        DBURL:    config.String("USERS_DB_URL", ""),
+    }, nil
+}
+```
+
+This approach keeps everything transparent. There’s no hidden behavior, no reflection, and debugging is trivial.
+
+However, as services multiply, you start noticing friction:
+
+* parsing logic repeated across services
+* duration parsing copied everywhere
+* validation scattered in multiple places
+* nested config becoming verbose
+* manual precedence handling
+
+The code stays simple, but **the amount of boilerplate grows linearly with the number of services**.
+
+This pattern works beautifully for small systems, but large monorepos often outgrow it.
+
+---
+
+# Struct Binding Libraries (cleanenv / caarlos0/env)
+
+Libraries like cleanenv or caarlos0/env take a very different stance: let structs describe configuration and bind automatically.
+
+```
+cmd/users/config.go
+```
+
+```go
+type Config struct {
+    HTTPPort int    `env:"USERS_HTTP_PORT" env-default:"8080"`
+    DBURL    string `env:"USERS_DB_URL" env-required:"true"`
+}
+```
+
+Load:
+
+```go
+func LoadConfig() (Config, error) {
+    var cfg Config
+    if err := env.Parse(&cfg); err != nil {
+        return Config{}, err
+    }
+    return cfg, nil
+}
+```
+
+This dramatically reduces boilerplate. Defaults, required flags, and parsing are all encoded in struct tags.
+
+The convenience is attractive, especially for services that primarily consume environment variables.
+
+But as systems grow, some subtle issues surface:
+
+* struct tags start mixing runtime semantics with deployment details
+* validation logic often spreads between tags and code
+* shared components become harder to reuse because tags are tied to a specific service prefix
+* refactoring config structure becomes riskier due to tag coupling
+* defaults drift away from the component that actually owns them
+
+These libraries are excellent for **service-level configuration**, but less ideal when configuration ownership needs to be distributed across packages.
+
+---
+
+# Full Configuration Frameworks (Viper-style)
+
+This approach treats configuration as a full system:
+
+```
+internal/config/config.go
+```
+
+```go
+viper.SetDefault("http.port", 8080)
+viper.AutomaticEnv()
+viper.ReadInConfig()
+```
+
+Then anywhere:
+
+```go
+port := viper.GetInt("http.port")
+```
+
+This provides:
+
+* multiple sources
+* hot reload
+* nested config
+* remote config
+* flags integration
+
+It’s powerful — and that power is exactly where complexity sneaks in.
+
+Over time, teams notice:
+
+* config lookups appear throughout the codebase
+* runtime dependencies become implicit
+* precedence rules become harder to reason about
+* testing components requires config mocking
+* refactoring config keys becomes risky
+
+This pattern is great for **tools, CLIs, and platform-style apps**, but backend services often benefit from stronger boundaries.
+
+---
+
+# Patterns That Matter More Than the Library
+
+Regardless of tooling, production systems tend to succeed when they follow a few principles.
+
+## Typed Configuration Early
+
+Convert raw strings into typed values at startup.
+Avoid string parsing deep in business logic.
+
+## Fail Fast
+
+Invalid configuration should stop the application immediately.
+Silent defaults often hide production issues.
+
+## Immutable After Startup
+
+Load configuration once.
+Avoid runtime mutation unless absolutely necessary.
+
+## Explicit Ownership
+
+Each component should clearly declare what configuration it needs.
+
+## Boundary Injection
+
+Configuration should enter the system at the bootstrap layer and flow inward, never the reverse.
+
+These principles shape architecture more than any library choice.
+
+---
+
+# A Balanced Approach: Loader + Package-Owned Config
+
+A scalable pattern emerges when combining these ideas:
+
+* `internal/config` handles **loading**
+* each package owns **typed config**
+* `cmd/<service>` composes everything
+
+This creates a clean separation of concerns.
+
+```
+internal/
+  config/
+  logging/
+  transport/
+  db/
+
+cmd/
+  users/
+    config.go
+```
+
+---
+
+# Component-Owned Configuration
+
+Each runtime component defines its own config.
+
+### internal/logging/config.go
+
+```go
+package logging
+
+type Config struct {
+    Level string
+    JSON  bool
+}
+
+func DefaultConfig() Config {
+    return Config{
+        Level: "info",
+        JSON:  false,
+    }
+}
+
+func (c Config) Validate() error {
+    switch c.Level {
+    case "debug", "info", "warn", "error":
+        return nil
+    }
+    return fmt.Errorf("invalid level: %s", c.Level)
+}
+```
+
+Defaults and validation live where semantics are understood.
+
+---
+
+# Loader Package
+
+```
+internal/config/loader.go
+```
+
+```go
+package config
+
+type Loader struct {
+    prefix string
+}
+
+func New(prefix string) *Loader {
+    return &Loader{prefix: prefix}
+}
+
+func (l *Loader) String(key, def string) string {
+    if v := os.Getenv(l.prefix + "_" + key); v != "" {
+        return v
+    }
+    return def
+}
+```
+
+This package only reads values.
+It does not know about logging, DB, or HTTP.
+
+---
+
+# Service Bootstrap
+
+```
+cmd/users/config.go
+```
+
+```go
+type Config struct {
+    Log  logging.Config
+    HTTP transport.Config
+    DB   db.Config
+}
+
+func LoadConfig() (Config, error) {
+    loader := config.New("USERS")
+
+    logCfg := logging.DefaultConfig()
+    logCfg.Level = loader.String("LOG_LEVEL", logCfg.Level)
+
+    httpCfg := transport.DefaultConfig()
+    httpCfg.Addr = loader.String("HTTP_ADDR", httpCfg.Addr)
+
+    dbCfg := db.DefaultConfig()
+    dbCfg.URL = loader.String("DB_URL", dbCfg.URL)
+
+    cfg := Config{
+        Log:  logCfg,
+        HTTP: httpCfg,
+        DB:   dbCfg,
+    }
+
+    return cfg, errors.Join(
+        cfg.Log.Validate(),
+        cfg.HTTP.Validate(),
+        cfg.DB.Validate(),
+    )
+}
+```
+
+This file becomes the **composition root** for configuration.
+
+---
+
+# Why This Pattern Scales
+
+This design naturally satisfies production best practices:
+
+* components own their semantics
+* configuration remains strongly typed
+* services explicitly declare dependencies
+* loader logic stays reusable
+* microservice extraction becomes trivial
+* no global config state
+
+The architecture remains clear even as services grow.
+
+---
+
+# Things to Watch Out For
+
+This approach works best when applied thoughtfully.
+
+### Not Every Package Needs Config
+
+Only runtime components should define configuration:
+
+* logging
+* HTTP server
+* DB
+* external clients
+
+Utility packages rarely need runtime config.
+
+### Avoid Reflection-Based Magic
+
+Keep the loader simple.
+When config loading becomes a mini-framework, debugging becomes harder.
+
+### Prefer Structs Over Excessive Functional Options
+
+Functional options are useful for optional behavior, but runtime configuration is clearer when expressed as data.
+
+---
+
+# Conclusion
+
+Configuration in Go is less about picking the right library and more about drawing clean boundaries.
+
+A sustainable approach:
+
+* keeps loading separate from ownership
+* lets packages define their own configuration
+* injects config at the application boundary
+* avoids global mutable state
+* remains explicit and testable
+
+This balanced model works equally well for modular monoliths and microservices — and keeps configuration boring, predictable, and maintainable.
+
+And in production systems, boring is usually a feature.
