@@ -1,78 +1,70 @@
 ---
 title: "DB Transactions"
-description: "How to keep clean transaction boundaries in Go while using sqlc-generated queries."
+description: "Transaction Boundaries in Go: Who Should Own Them?"
 pubDate: 2026-03-22
 tags: ["golang", "repository-pattern", "database", "sqlc", "forge"]
 heroImage: ""
 ---
 
-When building services in Forge, a common design question appears quickly:
+When learning software architecture in Go, one topic that looks simple at first—but quickly gets subtle—is **database transactions with the repository pattern**.
 
-> Should transaction handling live in repositories, or in the service/use-case layer?
+At some point, you’ll ask yourself:
 
-With `sqlc`, this is easier to solve cleanly because generated queries already support transaction rebinding through `WithTx`.
+> If transactions belong to the persistence layer, why do they often appear in the service layer?
+> Isn’t that crossing responsibilities?
 
-The short answer in Forge:
+This question sits right at the intersection of clean architecture, repository pattern design, and Go’s explicit approach to database handling. The answer is not just about code — it’s about **where business consistency actually lives**.
 
-**Service defines the transaction boundary. Repositories stay focused on data operations. Transaction mechanics are implemented by infrastructure.**
-
----
-
-### Why This Boundary Matters
-
-Suppose one use case needs these steps:
-
-- create order
-- create order items
-- reserve stock
-- insert payment attempt
-
-Business-wise, this is one atomic operation. If step 3 fails, steps 1-2 must roll back.
-
-If each repository method starts and commits its own transaction, cross-repository atomicity breaks.
+Let’s break it down.
 
 ---
 
-### sqlc-Friendly Structure in Forge
+## The Need for Atomic Operations in Applications
 
-`sqlc` typically generates:
+Almost every real-world application has operations that must succeed or fail **as a unit**:
 
-```go title="internal/db/queries.go"
-type Queries struct {
-    db DBTX
-}
+* placing an order
+* creating a user and provisioning resources
+* transferring money
+* reserving inventory
 
-func New(db DBTX) *Queries
-func (q *Queries) WithTx(tx *sql.Tx) *Queries
+These operations typically span **multiple repositories**:
+
+```text
+Create Order
+ ├─ OrderRepository
+ ├─ InventoryRepository
+ └─ PaymentRepository
 ```
 
-That `WithTx` is the key: your repositories can receive `*db.Queries`, and a transaction-aware copy can be injected inside a use case.
+From a business perspective, this is **one use case**.
+From a database perspective, this must be **one transaction**.
+
+This is where the design tension starts:
+
+* Transactions come from the database layer
+* Atomicity belongs to business logic
+
+So who should own it?
 
 ---
 
-### A Practical Pattern
+## Common Patterns (and Where They Start to Hurt)
 
-#### Transaction Runner in Infrastructure
+### Repository Owns the Transaction
 
-```go title="internal/infra/tx/runner.go"
-type TxRunner interface {
-    WithinTx(ctx context.Context, fn func(q *db.Queries) error) error
-}
+A common first attempt is letting each repository manage its own transaction.
 
-type SQLCTxRunner struct {
-    db *sql.DB
-    q  *db.Queries
-}
-
-func (r *SQLCTxRunner) WithinTx(ctx context.Context, fn func(q *db.Queries) error) error {
+```go
+func (r *OrderRepository) Create(ctx context.Context, order Order) error {
     tx, err := r.db.BeginTx(ctx, nil)
     if err != nil {
         return err
     }
+    defer tx.Rollback()
 
-    qtx := r.q.WithTx(tx)
-    if err := fn(qtx); err != nil {
-        _ = tx.Rollback()
+    _, err = tx.ExecContext(ctx, "INSERT INTO orders ...")
+    if err != nil {
         return err
     }
 
@@ -80,68 +72,294 @@ func (r *SQLCTxRunner) WithinTx(ctx context.Context, fn func(q *db.Queries) erro
 }
 ```
 
-#### Repositories Use `*db.Queries`
+This looks clean and encapsulated. The repository handles persistence concerns internally.
 
-```go title="internal/order/repository.go"
-type OrderRepository struct {
-    q *db.Queries
-}
+But problems appear immediately when multiple repositories must coordinate:
 
-func NewOrderRepository(q *db.Queries) *OrderRepository {
-    return &OrderRepository{q: q}
-}
+```go
+orderRepo.Create(...)
+inventoryRepo.Reserve(...)
+paymentRepo.Create(...)
+```
 
-func (r *OrderRepository) Create(ctx context.Context, arg db.CreateOrderParams) error {
-    _, err := r.q.CreateOrder(ctx, arg)
-    return err
+Each repository commits independently.
+If the third call fails, your system is now in an inconsistent state.
+
+What looked like good encapsulation becomes **fragmented atomicity**.
+
+---
+
+### Service Layer Owns `*sql.Tx`
+
+The next approach is letting the service explicitly control the transaction:
+
+```go
+tx, _ := db.BeginTx(ctx, nil)
+defer tx.Rollback()
+
+orderRepo.Create(ctx, tx, order)
+inventoryRepo.Reserve(ctx, tx, items)
+paymentRepo.Create(ctx, tx, payment)
+
+tx.Commit()
+```
+
+This solves consistency, but introduces a new discomfort:
+
+* service now depends on `*sql.Tx`
+* persistence detail leaks into application layer
+* repository signatures become noisy
+
+You gain correctness, but lose architectural clarity.
+
+---
+
+### Hidden Transactions via Context
+
+Some designs hide transactions inside `context.Context`:
+
+```go
+ctx = context.WithValue(ctx, txKey, tx)
+```
+
+Repositories pull the transaction from context if present.
+
+This reduces explicit dependencies, but introduces hidden behavior:
+
+* difficult to reason about
+* harder to test
+* implicit coupling
+* surprises during debugging
+
+This pattern often trades **explicitness for magic**, and Go usually prefers the opposite.
+
+---
+
+## Patterns That Matter More Than Library Choice
+
+Before choosing a specific implementation, a few principles matter more than the mechanics.
+
+### Transaction scope belongs to the use case
+
+Atomicity is a **business decision**, not just a persistence detail.
+
+The service layer should decide:
+
+> These operations must succeed or fail together.
+
+It should not decide:
+
+* isolation level
+* SQL statements
+* lock strategy
+* retry behavior
+
+That distinction keeps responsibilities clean.
+
+---
+
+### Repositories should not commit business flows
+
+Repositories represent **data access**, not business workflows.
+
+When a repository commits, it assumes it knows the transaction boundary — which it usually doesn’t.
+
+This leads to partial updates and inconsistent state.
+
+---
+
+### Transaction mechanics should stay in infrastructure
+
+Even if the service defines atomicity, it should not care about:
+
+* `sql.Tx`
+* `BEGIN/COMMIT`
+* driver-specific APIs
+
+This suggests introducing an abstraction.
+
+---
+
+## The Sweet Spot: Transaction Manager / Unit of Work
+
+The balanced approach is:
+
+* Service defines **atomic use case**
+* Infrastructure handles **transaction implementation**
+* Repositories remain **transaction-agnostic**
+
+This usually looks like a transaction manager.
+
+### Transaction Manager Interface
+
+```go
+type TransactionManager interface {
+    WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
 }
 ```
 
-#### Service Controls Atomic Boundary
+Infrastructure implementation:
 
-```go title="internal/order/place_order_service.go"
-type PlaceOrderService struct {
-    txRunner TxRunner
+```go
+type SQLTxManager struct {
+    db *sql.DB
 }
 
-func (s *PlaceOrderService) Execute(ctx context.Context, in Input) error {
-    return s.txRunner.WithinTx(ctx, func(q *db.Queries) error {
-        orderRepo := NewOrderRepository(q)
-        itemRepo := NewOrderItemRepository(q)
-        stockRepo := NewStockRepository(q)
-
-        if err := orderRepo.Create(ctx, in.Order); err != nil {
-            return err
-        }
-        if err := itemRepo.BulkInsert(ctx, in.Items); err != nil {
-            return err
-        }
-        if err := stockRepo.Reserve(ctx, in.Items); err != nil {
-            return err
-        }
+func (m *SQLTxManager) WithinTransaction(
+    ctx context.Context,
+    fn func(ctx context.Context) error,
+) error {
+    tx, err := m.db.BeginTx(ctx, nil)
+    if err != nil {
         return err
+    }
+
+    defer tx.Rollback()
+
+    ctx = context.WithValue(ctx, txKey{}, tx)
+
+    if err := fn(ctx); err != nil {
+        return err
+    }
+
+    return tx.Commit()
+}
+```
+
+Service layer:
+
+```go
+func (s *OrderService) PlaceOrder(ctx context.Context, cmd PlaceOrder) error {
+    return s.txManager.WithinTransaction(ctx, func(ctx context.Context) error {
+        if err := s.orderRepo.Create(ctx, cmd.Order); err != nil {
+            return err
+        }
+
+        if err := s.inventoryRepo.Reserve(ctx, cmd.Items); err != nil {
+            return err
+        }
+
+        return s.paymentRepo.Create(ctx, cmd.Payment)
     })
 }
 ```
 
-This keeps service-level intent clear: "these operations succeed or fail together."
+Now the service says only:
+
+> Run this use case atomically.
+
+It does not know how transactions are implemented.
 
 ---
 
-### Rule of Thumb for Forge + sqlc
+## Making Repositories Transaction-Aware Without Coupling
 
-- Keep `BEGIN/COMMIT/ROLLBACK` in a transaction runner, not in repository methods.
-- Keep repositories small and query-focused.
-- Use `sqlc` `WithTx` to switch repositories into transactional mode.
-- Do not mix `*sql.DB` queries and `*sql.Tx` queries in the same atomic use case.
-- Keep transactions short; avoid long network calls while a tx is open.
+Repositories can read the transaction from context and fallback to DB.
+
+```go
+func (r *OrderRepository) exec(ctx context.Context) DBTX {
+    if tx, ok := ctx.Value(txKey{}).(*sql.Tx); ok {
+        return tx
+    }
+    return r.db
+}
+```
+
+Then:
+
+```go
+func (r *OrderRepository) Create(ctx context.Context, order Order) error {
+    db := r.exec(ctx)
+
+    _, err := db.ExecContext(ctx, `
+        INSERT INTO orders (id, total)
+        VALUES (?, ?)
+    `, order.ID, order.Total)
+
+    return err
+}
+```
+
+Repositories stay clean and reusable.
 
 ---
 
-### Optional Improvement: Context-Based Query Access
+## Advantages of This Balance
 
-If you want to avoid rebuilding repositories inside `WithinTx`, you can store transaction-aware `*db.Queries` in context and use a query provider in repositories. It can reduce boilerplate, but it also hides dependencies. In most Forge services, explicit injection inside `WithinTx` is clearer and easier to test.
+This approach gives you:
 
-### Final Take
+* clear transaction boundaries
+* atomic business operations
+* minimal leakage of persistence details
+* reusable repositories
+* easier testing
+* clean architecture separation
 
-In Forge with `sqlc`, use transaction runners for mechanics and services for transactional intent. This gives you clean boundaries, easier tests, and reliable multi-repository atomic behavior.
+Most importantly, it avoids pushing responsibility too far in either direction.
+
+---
+
+## Gotchas (Don’t Overdo It)
+
+Even good abstractions can become over-engineered.
+
+### Avoid full-blown Unit-of-Work frameworks early
+
+You don’t need:
+
+* generic repository factories
+* nested transaction graphs
+* lifecycle registries
+* dynamic repository binding
+
+Start simple. A small transaction manager is enough.
+
+---
+
+### Keep transactions short
+
+Do not:
+
+* call external APIs
+* publish messages
+* wait for queues
+* perform long computations
+
+inside a transaction.
+
+Transactions are for **database consistency**, not orchestration.
+
+---
+
+### Avoid nested transactions unless necessary
+
+Most drivers don’t support true nested transactions.
+Savepoints exist, but they add complexity and should be used intentionally.
+
+---
+
+### Don’t hide everything
+
+Too much abstraction can make debugging painful.
+If developers can’t tell whether code runs inside a transaction, the abstraction went too far.
+
+---
+
+## Conclusion
+
+Transactions originate from the persistence layer, but **transaction boundaries belong to business use cases**.
+
+The cleanest design separates these concerns:
+
+* Service layer defines atomicity
+* Infrastructure implements transactions
+* Repositories remain transaction-agnostic
+
+A small transaction manager provides the balance between correctness and architectural clarity.
+
+In Go — where explicitness is preferred — this approach keeps code readable, predictable, and easy to reason about.
+
+And perhaps the most important takeaway:
+
+> The service layer should not know *how* transactions work,
+> but it should decide *when* they are needed.
