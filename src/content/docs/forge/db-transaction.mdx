@@ -1,0 +1,147 @@
+---
+title: "DB Transactions"
+description: "How to keep clean transaction boundaries in Go while using sqlc-generated queries."
+pubDate: 2026-03-22
+tags: ["golang", "repository-pattern", "database", "sqlc", "forge"]
+heroImage: ""
+---
+
+When building services in Forge, a common design question appears quickly:
+
+> Should transaction handling live in repositories, or in the service/use-case layer?
+
+With `sqlc`, this is easier to solve cleanly because generated queries already support transaction rebinding through `WithTx`.
+
+The short answer in Forge:
+
+**Service defines the transaction boundary. Repositories stay focused on data operations. Transaction mechanics are implemented by infrastructure.**
+
+---
+
+## Why This Boundary Matters
+
+Suppose one use case needs these steps:
+
+- create order
+- create order items
+- reserve stock
+- insert payment attempt
+
+Business-wise, this is one atomic operation. If step 3 fails, steps 1-2 must roll back.
+
+If each repository method starts and commits its own transaction, cross-repository atomicity breaks.
+
+---
+
+## sqlc-Friendly Structure in Forge
+
+`sqlc` typically generates:
+
+```go
+type Queries struct {
+    db DBTX
+}
+
+func New(db DBTX) *Queries
+func (q *Queries) WithTx(tx *sql.Tx) *Queries
+```
+
+That `WithTx` is the key: your repositories can receive `*db.Queries`, and a transaction-aware copy can be injected inside a use case.
+
+---
+
+## A Practical Pattern
+
+### 1) Transaction runner in infrastructure
+
+```go
+type TxRunner interface {
+    WithinTx(ctx context.Context, fn func(q *db.Queries) error) error
+}
+
+type SQLCTxRunner struct {
+    db *sql.DB
+    q  *db.Queries
+}
+
+func (r *SQLCTxRunner) WithinTx(ctx context.Context, fn func(q *db.Queries) error) error {
+    tx, err := r.db.BeginTx(ctx, nil)
+    if err != nil {
+        return err
+    }
+
+    qtx := r.q.WithTx(tx)
+    if err := fn(qtx); err != nil {
+        _ = tx.Rollback()
+        return err
+    }
+
+    return tx.Commit()
+}
+```
+
+### 2) Repositories use `*db.Queries`
+
+```go
+type OrderRepository struct {
+    q *db.Queries
+}
+
+func NewOrderRepository(q *db.Queries) *OrderRepository {
+    return &OrderRepository{q: q}
+}
+
+func (r *OrderRepository) Create(ctx context.Context, arg db.CreateOrderParams) error {
+    _, err := r.q.CreateOrder(ctx, arg)
+    return err
+}
+```
+
+### 3) Service controls atomic boundary
+
+```go
+type PlaceOrderService struct {
+    txRunner TxRunner
+}
+
+func (s *PlaceOrderService) Execute(ctx context.Context, in Input) error {
+    return s.txRunner.WithinTx(ctx, func(q *db.Queries) error {
+        orderRepo := NewOrderRepository(q)
+        itemRepo := NewOrderItemRepository(q)
+        stockRepo := NewStockRepository(q)
+
+        if err := orderRepo.Create(ctx, in.Order); err != nil {
+            return err
+        }
+        if err := itemRepo.BulkInsert(ctx, in.Items); err != nil {
+            return err
+        }
+        if err := stockRepo.Reserve(ctx, in.Items); err != nil {
+            return err
+        }
+        return err
+    })
+}
+```
+
+This keeps service-level intent clear: "these operations succeed or fail together."
+
+---
+
+## Rule of Thumb for Forge + sqlc
+
+- Keep `BEGIN/COMMIT/ROLLBACK` in a transaction runner, not in repository methods.
+- Keep repositories small and query-focused.
+- Use `sqlc` `WithTx` to switch repositories into transactional mode.
+- Do not mix `*sql.DB` queries and `*sql.Tx` queries in the same atomic use case.
+- Keep transactions short; avoid long network calls while a tx is open.
+
+---
+
+## Optional Improvement: Context-Based Query Access
+
+If you want to avoid rebuilding repositories inside `WithinTx`, you can store transaction-aware `*db.Queries` in context and use a query provider in repositories. It can reduce boilerplate, but it also hides dependencies. In most Forge services, explicit injection inside `WithinTx` is clearer and easier to test.
+
+## Final Take
+
+In Forge with `sqlc`, use transaction runners for mechanics and services for transactional intent. This gives you clean boundaries, easier tests, and reliable multi-repository atomic behavior.
