@@ -1,0 +1,156 @@
+---
+import { getCollection } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+
+export async function getStaticPaths({ paginate }) {
+	const posts = await getCollection('blog');
+	const sorted = posts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+	return paginate(sorted, { pageSize: 10 });
+}
+
+const { page } = Astro.props;
+---
+
+<BlogLayout title="Blog" description="Writing on backend engineering, systems, and tools.">
+	<h1 class="blog-title">Blog</h1>
+
+	<ul class="post-list">
+		{page.data.map((post) => (
+			<li class="post-item">
+				<a href={`/blog/${post.id}/`} class="post-link">
+					<h2 class="post-title">{post.data.title}</h2>
+				</a>
+				<div class="post-meta">
+					<time datetime={post.data.pubDate.toISOString()}>
+						{post.data.pubDate.toLocaleDateString('en-US', {
+							year: 'numeric',
+							month: 'long',
+							day: 'numeric',
+						})}
+					</time>
+					{post.data.tags.length > 0 && (
+						<span class="post-tags">
+							{post.data.tags.map((tag) => (
+								<span class="tag">{tag}</span>
+							))}
+						</span>
+					)}
+				</div>
+				<p class="post-desc">{post.data.description}</p>
+			</li>
+		))}
+	</ul>
+
+	<nav class="pagination">
+		{page.url.prev ? (
+			<a href={page.url.prev} class="pagination-link">&larr; Newer</a>
+		) : (
+			<span class="pagination-link disabled">&larr; Newer</span>
+		)}
+		<span class="pagination-info">
+			Page {page.currentPage} of {page.lastPage}
+		</span>
+		{page.url.next ? (
+			<a href={page.url.next} class="pagination-link">Older &rarr;</a>
+		) : (
+			<span class="pagination-link disabled">Older &rarr;</span>
+		)}
+	</nav>
+</BlogLayout>
+
+<style>
+	.blog-title {
+		font-size: 1.6rem;
+		margin-bottom: 1.5rem;
+		color: var(--gb-fg-0);
+	}
+
+	.post-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.post-item {
+		padding: 1.25rem 0;
+		border-bottom: 1px solid var(--sl-color-border);
+	}
+
+	.post-item:first-child {
+		padding-top: 0;
+	}
+
+	.post-link {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.post-link:hover .post-title {
+		color: var(--gb-link-strong);
+	}
+
+	.post-title {
+		font-size: 1.2rem;
+		font-weight: 600;
+		color: var(--gb-fg-0);
+		margin-bottom: 0.25rem;
+	}
+
+	.post-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-size: 0.85rem;
+		color: var(--gb-fg-2);
+		margin-bottom: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.post-tags {
+		display: flex;
+		gap: 0.35rem;
+		flex-wrap: wrap;
+	}
+
+	.tag {
+		background: var(--sl-color-bg-inline-code);
+		border: 1px solid var(--sl-color-border);
+		padding: 0.08rem 0.45rem;
+		font-size: 0.78rem;
+		font-family: var(--gb-font-mono);
+	}
+
+	.post-desc {
+		color: var(--gb-fg-1);
+		font-size: 0.92rem;
+	}
+
+	.pagination {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 2rem;
+		font-size: 0.9rem;
+	}
+
+	.pagination-link {
+		padding: 0.4rem 0.85rem;
+		border: 1px solid var(--sl-color-border);
+		text-decoration: none;
+	}
+
+	.pagination-link:hover {
+		background: var(--gb-surface-hover);
+		border-color: var(--sl-color-border);
+	}
+
+	.pagination-link.disabled {
+		color: var(--sl-color-gray-3);
+		border-color: var(--sl-color-hairline);
+		pointer-events: none;
+	}
+
+	.pagination-info {
+		color: var(--gb-fg-2);
+	}
+</style>

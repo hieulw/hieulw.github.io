@@ -1,0 +1,124 @@
+---
+import { getCollection, render } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	return posts.map((post) => ({
+		params: { slug: post.id },
+		props: { post },
+	}));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BlogLayout title={post.data.title} description={post.data.description}>
+	<article class="post">
+		<header class="post-header">
+			<h1 class="post-title">{post.data.title}</h1>
+			<div class="post-meta">
+				<time datetime={post.data.pubDate.toISOString()}>
+					{post.data.pubDate.toLocaleDateString('en-US', {
+						year: 'numeric',
+						month: 'long',
+						day: 'numeric',
+					})}
+				</time>
+				{post.data.tags.length > 0 && (
+					<span class="post-tags">
+						{post.data.tags.map((tag) => (
+							<span class="tag">{tag}</span>
+						))}
+					</span>
+				)}
+			</div>
+		</header>
+		<div class="post-body">
+			<Content />
+		</div>
+	</article>
+
+	<div class="back-link">
+		<a href="/blog/">&larr; All posts</a>
+	</div>
+</BlogLayout>
+
+<style>
+	.post-header {
+		margin-bottom: 2rem;
+		padding-bottom: 1.25rem;
+		border-bottom: 1px solid var(--sl-color-border);
+	}
+
+	.post-title {
+		font-size: 1.8rem;
+		color: var(--gb-fg-0);
+		margin-bottom: 0.5rem;
+	}
+
+	.post-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-size: 0.88rem;
+		color: var(--gb-fg-2);
+		flex-wrap: wrap;
+	}
+
+	.post-tags {
+		display: flex;
+		gap: 0.35rem;
+		flex-wrap: wrap;
+	}
+
+	.tag {
+		background: var(--sl-color-bg-inline-code);
+		border: 1px solid var(--sl-color-border);
+		padding: 0.08rem 0.45rem;
+		font-size: 0.78rem;
+		font-family: var(--gb-font-mono);
+	}
+
+	.post-body {
+		font-size: 1.02rem;
+		line-height: 1.75;
+	}
+
+	.post-body :global(h2) {
+		font-size: 1.35rem;
+		color: var(--gb-fg-0);
+		margin-top: 2rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.post-body :global(ul) {
+		padding-left: 1.25rem;
+		margin-bottom: 1rem;
+	}
+
+	.post-body :global(li) {
+		margin-bottom: 0.35rem;
+	}
+
+	.post-body :global(p) {
+		margin-bottom: 1rem;
+	}
+
+	.post-body :global(a) {
+		color: var(--gb-link);
+		text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+	}
+
+	.post-body :global(a:hover) {
+		color: var(--gb-link-strong);
+		text-decoration-color: currentColor;
+	}
+
+	.back-link {
+		margin-top: 3rem;
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--sl-color-border);
+	}
+</style>

@@ -1,0 +1,122 @@
+---
+import '../styles/site.css';
+
+export interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{title} — hieulw</title>
+		{description && <meta name="description" content={description} />}
+	</head>
+	<body>
+		<header class="blog-header">
+			<div class="blog-header-inner">
+				<a href="/" class="blog-site-title">hieulw</a>
+				<nav>
+					<a href="/forge/">Forge</a>
+					<a href="/blog/">Blog</a>
+					<a href="https://github.com/hieulw">GitHub</a>
+				</nav>
+			</div>
+		</header>
+		<main class="blog-main">
+			<slot />
+		</main>
+		<footer class="blog-footer">
+			<span>&copy; {new Date().getFullYear()} hieulw</span>
+		</footer>
+	</body>
+</html>
+
+<style>
+	html {
+		color-scheme: dark;
+	}
+
+	body {
+		font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+			'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+		background: var(--gb-bg-0);
+		color: var(--gb-fg-1);
+		line-height: 1.7;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		margin: 0;
+	}
+
+	a {
+		color: var(--gb-link);
+		text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+		text-underline-offset: 0.15em;
+	}
+
+	a:hover {
+		color: var(--gb-link-strong);
+		text-decoration-color: currentColor;
+	}
+
+	.blog-header {
+		border-bottom: 1px solid var(--sl-color-border);
+		padding: 1rem 1.5rem;
+	}
+
+	.blog-header-inner {
+		max-width: 48rem;
+		margin: 0 auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.blog-site-title {
+		font-size: 1.15rem;
+		font-weight: 600;
+		color: var(--gb-fg-0);
+		text-decoration: none;
+	}
+
+	.blog-site-title:hover {
+		color: var(--gb-fg-0);
+	}
+
+	.blog-header nav {
+		display: flex;
+		gap: 1.25rem;
+		font-size: 0.9rem;
+	}
+
+	.blog-header nav a {
+		text-decoration: none;
+	}
+
+	.blog-main {
+		flex: 1;
+		max-width: 48rem;
+		width: 100%;
+		margin: 0 auto;
+		padding: 2rem 1.5rem;
+	}
+
+	.blog-footer {
+		border-top: 1px solid var(--sl-color-border);
+		padding: 1.25rem 1.5rem;
+		font-size: 0.85rem;
+		color: var(--gb-fg-2);
+		max-width: 48rem;
+		width: 100%;
+		margin: 0 auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+</style>
